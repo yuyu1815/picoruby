@@ -114,6 +114,24 @@ Machine_stack_usage(void)
   return 0;
 }
 
+uint32_t
+Machine_task_stack_free(void)
+{
+  return 0;
+}
+
+void
+Machine_memory_snapshot(char *buf, int maxlen)
+{
+  snprintf(buf, maxlen, "not_available=1");
+}
+
+void
+Machine_cpu_snapshot(char *buf, int maxlen)
+{
+  snprintf(buf, maxlen, "uptime_us=%llu", (unsigned long long)Machine_uptime_us());
+}
+
 void
 Machine_exit(int status)
 {

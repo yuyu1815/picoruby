@@ -96,7 +96,9 @@ class Shell
     unique_id = Machine.unique_id
     if File.file?(desc_file)
       File.open(desc_file, "r") do |f|
-        f.read.chomp == RUBY_DESCRIPTION and return
+        if f.read.chomp == RUBY_DESCRIPTION && File.file?("#{root}/bin/ai_probe")
+          return
+        end
       end
     end
     flawless = true
