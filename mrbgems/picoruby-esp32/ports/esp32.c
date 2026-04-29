@@ -1,4 +1,4 @@
-#if defined(CONFIG_ESP_WIFI_ENABLED)
+#if defined(CONFIG_ESP_WIFI_ENABLED) && !defined(PICORUBY_DISABLE_ESP_WIFI)
 
 #include <string.h>
 #include "esp_wifi.h"

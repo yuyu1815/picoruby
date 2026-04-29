@@ -17,6 +17,10 @@
 
 #include "esp_sleep.h"
 #include "esp_timer.h"
+#include "esp_heap_caps.h"
+#include "esp_clk_tree.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "hal/efuse_hal.h"
 #include "rom/ets_sys.h"
 
@@ -307,8 +311,50 @@ Machine_get_unique_id(char *id_str)
 uint32_t
 Machine_stack_usage(void)
 {
-  // Not implemented
-  return 0;
+  return Machine_task_stack_free();
+}
+
+uint32_t
+Machine_task_stack_free(void)
+{
+  return (uint32_t)(uxTaskGetStackHighWaterMark(NULL) * sizeof(StackType_t));
+}
+
+void
+Machine_memory_snapshot(char *buf, int maxlen)
+{
+  size_t internal_free = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+  size_t internal_min = heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL);
+  size_t internal_largest = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL);
+  size_t spiram_free = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+  size_t spiram_min = heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
+  size_t spiram_largest = heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM);
+  snprintf(buf, maxlen,
+    "internal_free=%u,internal_min=%u,internal_largest=%u,spiram_free=%u,spiram_min=%u,spiram_largest=%u,free_heap=%u,min_free_heap=%u",
+    (unsigned int)internal_free,
+    (unsigned int)internal_min,
+    (unsigned int)internal_largest,
+    (unsigned int)spiram_free,
+    (unsigned int)spiram_min,
+    (unsigned int)spiram_largest,
+    (unsigned int)esp_get_free_heap_size(),
+    (unsigned int)esp_get_minimum_free_heap_size()
+  );
+}
+
+void
+Machine_cpu_snapshot(char *buf, int maxlen)
+{
+  uint32_t cpu_freq_mhz = 0;
+  esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_CPU, ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED, &cpu_freq_mhz);
+  cpu_freq_mhz /= 1000000;
+  snprintf(buf, maxlen,
+    "uptime_us=%llu,cpu_freq_mhz=%u,freertos_hz=%u,task_stack_free=%u",
+    (unsigned long long)Machine_uptime_us(),
+    (unsigned int)cpu_freq_mhz,
+    (unsigned int)configTICK_RATE_HZ,
+    (unsigned int)Machine_task_stack_free()
+  );
 }
 
 bool

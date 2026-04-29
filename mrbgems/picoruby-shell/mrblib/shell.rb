@@ -96,7 +96,9 @@ class Shell
     unique_id = Machine.unique_id
     if File.file?(desc_file)
       File.open(desc_file, "r") do |f|
-        f.read.chomp == RUBY_DESCRIPTION and return
+        if f.read.chomp == RUBY_DESCRIPTION && File.file?("#{root}/bin/ai_probe")
+          return
+        end
       end
     end
     flawless = true
@@ -317,7 +319,10 @@ class Shell
   AUTHOR_COLOR = 207
 
   def show_logo(color_num = 6) # color_num: 0..11
-    return if ENV['TERM'] == "dumb"
+    if ENV['TERM'] == "dumb"
+      show_plain_logo
+      return
+    end
     return if @editor.width < LOGO_WIDTH
     margin = " " * ((@editor.width - LOGO_WIDTH) / 2)
 
@@ -389,6 +394,28 @@ class Shell
       y2 += 1
     end
     puts "\e[0m"
+  end
+
+  def show_plain_logo
+    return if @editor.width < LOGO_WIDTH
+    margin = " " * ((@editor.width - LOGO_WIDTH) / 2)
+    y = 0
+    while y < LOGO.size
+      print margin
+      x = 0
+      while x < LOGO[y].bytesize
+        c = LOGO[y][x]
+        if y == LOGO.size - 1
+          a = AUTHOR[x] # steep:ignore
+          print(a == " " ? (c == '1' ? ":" : " ") : a)
+        else
+          print(c == '1' ? ":" : " ")
+        end
+        x += 1
+      end
+      puts
+      y += 1
+    end
   end
 
   def start(mode = :shell)
