@@ -9,6 +9,7 @@
 /bin/free
 /bin/head
 /bin/hello
+/bin/ai_probe
 /bin/ifconfig
 /bin/install
 /bin/irb

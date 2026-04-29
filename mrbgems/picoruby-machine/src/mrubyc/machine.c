@@ -146,6 +146,30 @@ c_Machine_stack_usage(mrbc_vm *vm, mrbc_value *v, int argc)
   }
 }
 
+static void
+c_Machine_task_stack_free(mrbc_vm *vm, mrbc_value *v, int argc)
+{
+  SET_INT_RETURN((mrbc_int_t)Machine_task_stack_free());
+}
+
+static void
+c_Machine_memory_snapshot(mrbc_vm *vm, mrbc_value *v, int argc)
+{
+  char buf[256] = {0};
+  Machine_memory_snapshot(buf, sizeof(buf));
+  mrbc_value ret = mrbc_string_new_cstr(vm, buf);
+  SET_RETURN(ret);
+}
+
+static void
+c_Machine_cpu_snapshot(mrbc_vm *vm, mrbc_value *v, int argc)
+{
+  char buf[160] = {0};
+  Machine_cpu_snapshot(buf, sizeof(buf));
+  mrbc_value ret = mrbc_string_new_cstr(vm, buf);
+  SET_RETURN(ret);
+}
+
 #if !defined(PICORB_PLATFORM_POSIX)
 #include <time.h>
 #endif
@@ -442,6 +466,9 @@ mrbc_machine_init(mrbc_vm *vm)
   mrbc_define_method(vm, module_Machine, "unique_id", c_Machine_unique_id);
   mrbc_define_method(vm, module_Machine, "read_memory", c_Machine_read_memory);
   mrbc_define_method(vm, module_Machine, "stack_usage", c_Machine_stack_usage);
+  mrbc_define_method(vm, module_Machine, "task_stack_free", c_Machine_task_stack_free);
+  mrbc_define_method(vm, module_Machine, "memory_snapshot", c_Machine_memory_snapshot);
+  mrbc_define_method(vm, module_Machine, "cpu_snapshot", c_Machine_cpu_snapshot);
 
   mrbc_define_method(vm, module_Machine, "set_hwclock", c_Machine_set_hwclock);
   mrbc_define_method(vm, module_Machine, "get_hwclock", c_Machine_get_hwclock);
